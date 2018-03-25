@@ -6,7 +6,8 @@ from keras.utils import np_utils
 
 
 filename = "producthunt.txt"
-raw_text = open(filename).read().lower()
+raw_text = open(filename).read().lower().replace('\n', ' ')
+print(raw_text)
 
 # create mapping of unique chars to integers
 chars = sorted(list(set(raw_text)))
