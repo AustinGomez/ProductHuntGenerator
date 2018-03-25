@@ -10,8 +10,8 @@ from keras.utils import np_utils
 
 # load ascii text and covert to lowercase
 filename = "producthunt.txt"
-raw_text = open(filename).read()
-raw_text = raw_text.lower()
+raw_text = open(filename).read().lower().replace('\n', ' ')
+
 # create mapping of unique chars to integers, and a reverse mapping
 chars = sorted(list(set(raw_text)))
 char_to_int = dict((c, i) for i, c in enumerate(chars))
@@ -46,7 +46,7 @@ model.add(LSTM(256))
 model.add(Dropout(0.2))
 model.add(Dense(y.shape[1], activation='softmax'))
 # load the network weights
-filename = "03-3.1266.hdf5"
+filename = "11-2.5177.hdf5"
 model.load_weights(filename)
 model.compile(loss='categorical_crossentropy', optimizer='adam')
 # pick a random seed
@@ -55,14 +55,16 @@ pattern = dataX[start]
 print("Seed:")
 print("\"", "AirBNB", "\"")
 # generate characters
-for i in range(1000):
+results = ""
+for i in range(30):
     x = numpy.reshape(pattern, (1, len(pattern), 1))
     x = x / float(n_vocab)
     prediction = model.predict(x, verbose=0)
     index = numpy.argmax(prediction)
     result = int_to_char[index]
     seq_in = [int_to_char[value] for value in pattern]
-    sys.stdout.write(result)
     pattern.append(index)
     pattern = pattern[1:len(pattern)]
+    results += result
+print(results)
 print("\nDone.")

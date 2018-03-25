@@ -1,50 +1,72 @@
-import numpy
+from __future__ import print_function
+import numpy as np
+import time
+import csv
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, LSTM
-from keras.callbacks import ModelCheckpoint
-from keras.utils import np_utils
+from keras.layers.core import Dense, Activation, Dropout
+from keras.layers.recurrent import LSTM, SimpleRNN
+from keras.layers.wrappers import TimeDistributed
+import argparse
+from RNN_utils import *
 
+# Parsing arguments for Network definition
+ap = argparse.ArgumentParser()
+ap.add_argument('-data_dir', default='./producthunt.txt')
+ap.add_argument('-batch_size', type=int, default=50)
+ap.add_argument('-layer_num', type=int, default=2)
+ap.add_argument('-seq_length', type=int, default=50)
+ap.add_argument('-hidden_dim', type=int, default=500)
+ap.add_argument('-generate_length', type=int, default=500)
+ap.add_argument('-nb_epoch', type=int, default=20)
+ap.add_argument('-mode', default='train')
+ap.add_argument('-weights', default='')
+args = vars(ap.parse_args())
 
-filename = "producthunt.txt"
-raw_text = open(filename).read().lower().replace('\n', ' ')
-print(raw_text)
+DATA_DIR = args['data_dir']
+BATCH_SIZE = args['batch_size']
+HIDDEN_DIM = args['hidden_dim']
+SEQ_LENGTH = args['seq_length']
+WEIGHTS = args['weights']
 
-# create mapping of unique chars to integers
-chars = sorted(list(set(raw_text)))
-char_to_int = dict((c, i) for i, c in enumerate(chars))
-total_characters = len(raw_text)
-total_vocab = len(chars)
-print("Total vocabulary: ", total_vocab)
+GENERATE_LENGTH = args['generate_length']
+LAYER_NUM = args['layer_num']
 
-sequence_length = 100
-dataX, dataY = [], []
-for i in range(0, total_characters - sequence_length, 1):
-    sequence_in = raw_text[i:i + sequence_length]
-    sequence_out = raw_text[i + sequence_length]
-    dataX.append([char_to_int[char] for char in sequence_in])
-    dataY.append(char_to_int[sequence_out])
-n_patterns = len(dataX)
-print("Total Patterns: ", n_patterns)
+# Creating training data
+X, y, VOCAB_SIZE, ix_to_char = load_data(DATA_DIR, SEQ_LENGTH)
 
-X = numpy.reshape(dataX, (n_patterns, sequence_length, 1))
-X = X / float(total_vocab)
-y = np_utils.to_categorical(dataY)
-
-# Model definition.
+# Creating and compiling the Network
 model = Sequential()
-model.add(LSTM(256, input_shape=(X.shape[1], X.shape[2]), return_sequences=True))
-model.add(Dropout(0.2))
-model.add(LSTM(256))
-model.add(Dropout(0.2))
-model.add(Dense(y.shape[1], activation='softmax'))
-model.compile(loss='categorical_crossentropy', optimizer='adam')
+model.add(LSTM(HIDDEN_DIM, input_shape=(None, VOCAB_SIZE), return_sequences=True))
+for i in range(LAYER_NUM - 1):
+    model.add(LSTM(HIDDEN_DIM, return_sequences=True))
+model.add(TimeDistributed(Dense(VOCAB_SIZE)))
+model.add(Activation('softmax'))
+model.compile(loss="categorical_crossentropy", optimizer="rmsprop")
 
-# Checkpoint definition
-filepath = "{epoch:02d}-{loss:.4f}.hdf5"
-checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
-callbacks_list = [checkpoint]
+# Generate some sample before training to know how bad it is!
+generate_text(model, args['generate_length'], VOCAB_SIZE, ix_to_char)
 
-# fit the model
-model.fit(X, y, epochs=50, batch_size=64, callbacks=callbacks_list)
+if not WEIGHTS == '':
+    model.load_weights(WEIGHTS)
+    nb_epoch = int(WEIGHTS[WEIGHTS.rfind('_') + 1:WEIGHTS.find('.')])
+else:
+    nb_epoch = 0
 
+# Training if there is no trained weights specified
+if args['mode'] == 'train' or WEIGHTS == '':
+    while True:
+        print('\n\nEpoch: {}\n'.format(nb_epoch))
+        model.fit(X, y, batch_size=BATCH_SIZE, verbose=1, nb_epoch=1)
+        nb_epoch += 1
+        generate_text(model, GENERATE_LENGTH, VOCAB_SIZE, ix_to_char)
+        if nb_epoch % 10 == 0:
+            model.save_weights('checkpoint_layer_{}_hidden_{}_epoch_{}.hdf5'.format(LAYER_NUM, HIDDEN_DIM, nb_epoch))
 
+# Else, loading the trained weights and performing generation only
+elif WEIGHTS == '':
+    # Loading the trained weights
+    model.load_weights(WEIGHTS)
+    generate_text(model, GENERATE_LENGTH, VOCAB_SIZE, ix_to_char)
+    print('\n\n')
+else:
+    print('\n\nNothing to do!')
