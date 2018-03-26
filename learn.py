@@ -38,6 +38,7 @@ X, y, VOCAB_SIZE, ix_to_char = load_data(DATA_DIR, SEQ_LENGTH)
 model = Sequential()
 model.add(LSTM(HIDDEN_DIM, input_shape=(None, VOCAB_SIZE), return_sequences=True))
 for i in range(LAYER_NUM - 1):
+    model.add(Dropout(0.2))
     model.add(LSTM(HIDDEN_DIM, return_sequences=True))
 model.add(TimeDistributed(Dense(VOCAB_SIZE)))
 model.add(Activation('softmax'))
