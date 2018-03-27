@@ -1,0 +1,75 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.product-box {
+  border: 1px solid gray;
+  margin-bottom: 12px;
+  padding: 1em;
+
+  &:hover {
+    background-color: #E7E7E7;
+  }
+
+  .product-icon {
+    height: 7em;
+    padding: 0.5em;
+    margin-left: -17px;
+  }
+}
+
+.feed-box {
+  position: -webkit-sticky;  // required for Safari
+  position: sticky;
+  top: 50px; // required as well.
+  span {
+    border: 1px solid white;  
+    padding: 5px;
+    &:hover {
+      border: 1px solid gray;
+      border-radius: 5px;
+      background-color: #F7F7F7;
+    }
+  }
+  .feed-row {
+    font-size: 90%;
+    color: darkslategray;
+    padding-left: 5px;
+  }
+}
+
+.lead-jumbo {
+  height: 60vh;
+  background: linear-gradient(0deg,rgba(51, 51, 51, 0.3),rgba(49, 49, 49, 0.4)),url('animals-2222007_1280.jpg');  
+  color: white;
+
+  display: flex;
+  align-items: center;
+}
+
+

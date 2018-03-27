@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Not Product Hunt",
+  "name": "Like product hunt, but everything's fake.",
   "icons": [
     {
       "src": "favicon.ico",

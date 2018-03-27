@@ -1,0 +1,21 @@
+.navbar-brand {
+    color: red !important;
+}
+
+.nav-link {
+    color: gray;
+    &:hover {
+        color: red;
+    }
+}
+
+#login-btn {
+    background-color: white;
+    color: red;
+    border-color: red;
+
+    &:hover {
+        background-color: red;
+        color: white;
+    }
+}
