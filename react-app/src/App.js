@@ -65,7 +65,7 @@ class App extends Component {
                   return (
                     <div className="row product-box" key={index}>
                       <div className="col-md-2 col-4">
-                        <img className="product-icon" src={require('./producthunt.png')} />
+                        <img className="product-icon" src={require('./images/producthunt.png')} />
                       </div>
                       <div className="col text-left">
                         <h4>
